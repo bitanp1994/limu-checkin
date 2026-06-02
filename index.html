@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Floor Check-in 🍋</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --lemon:#F5C842;--lemondark:#C8960A;--lemondeep:#E8B820;
+  --bg:#FFFDF5;--card:#ffffff;--text:#1a1a1a;--text2:#6b6b6b;
+  --border:#ede8d8;--rm:12px;--rl:18px;
+}
+@media(prefers-color-scheme:dark){
+  :root{--bg:#1a1a1a;--card:#262626;--text:#f0f0f0;--text2:#888;--border:#333;}
+  .choice-btn.selected{background:#3a2e00!important}
+}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:var(--bg);color:var(--text);max-width:420px;margin:0 auto;min-height:100vh;padding-bottom:2rem}
+.top-bar{background:var(--lemon);padding:1rem 1.25rem 0.75rem;display:flex;align-items:center;justify-content:space-between;border-bottom:3px solid var(--lemondeep)}
+.top-title{font-size:16px;font-weight:700;color:#1a1a1a}
+.top-sub{font-size:11px;color:#5a4a00;margin-top:1px}
+.week-pill{background:#fff8e0;border:1.5px solid var(--lemondeep);border-radius:20px;padding:4px 12px;font-size:11px;font-weight:600;color:var(--lemondark)}
+.pg{display:none;padding:1.25rem}.pg.active{display:block}
+.lsvg{filter:drop-shadow(0 6px 14px rgba(200,150,0,0.22))}
+.cel{animation:bonce .7s ease-in-out infinite alternate}
+@keyframes bonce{0%{transform:translateY(0)}100%{transform:translateY(-10px)}}
+.wiggle{animation:wigg .35s ease-in-out}
+@keyframes wigg{0%{transform:rotate(0)}25%{transform:rotate(-7deg)}75%{transform:rotate(7deg)}100%{transform:rotate(0)}}
+.name-stage{text-align:center;padding:1.5rem 0 1rem}
+.name-card{background:var(--card);border:2px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.anon-note{display:flex;align-items:flex-start;gap:8px;background:#EEF6FF;border:1.5px solid #BDD8F5;border-radius:var(--rm);padding:10px 12px;margin-bottom:14px;font-size:12px;color:#1a5a8a;line-height:1.6}
+.name-label{font-size:14px;font-weight:600;margin-bottom:8px}
+.name-input{width:100%;padding:13px;border:2px solid var(--border);border-radius:var(--rm);font-size:16px;font-family:inherit;background:var(--bg);color:var(--text);outline:none;transition:border .2s}
+.name-input:focus{border-color:var(--lemon)}
+.dots-wrap{display:flex;gap:5px;flex-wrap:wrap;justify-content:center;max-width:260px;margin:0 auto 8px}
+.dot{width:22px;height:22px;border-radius:50%;background:var(--border);display:flex;align-items:center;justify-content:center;font-size:10px;font-weight:700;transition:all .4s cubic-bezier(.34,1.56,.64,1);border:2px solid transparent}
+.dot.on{background:var(--lemon);border-color:var(--lemondeep);color:var(--lemondark);transform:scale(1.1)}
+.limu-name-txt{font-size:20px;font-weight:800;color:var(--lemondark);margin-bottom:2px}
+.limu-mood{font-size:13px;font-weight:600;margin-bottom:4px}
+.limu-msg{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:10px}
+.team-count-txt{font-size:13px;font-weight:700;color:var(--lemondark);margin-bottom:0}
+.bp{width:100%;padding:14px;background:var(--lemon);color:#1a1a1a;border:none;border-radius:var(--rm);font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;box-shadow:0 4px 0 var(--lemondeep);transition:all .15s;margin-top:8px}
+.bp:active{transform:translateY(2px);box-shadow:0 2px 0 var(--lemondeep)}
+.bp:disabled{opacity:.4;cursor:not-allowed;box-shadow:none;transform:none}
+.bs{width:100%;padding:12px;background:transparent;color:var(--text);border:2px solid var(--border);border-radius:var(--rm);font-size:13px;cursor:pointer;font-family:inherit;margin-top:8px}
+.prog-bar{height:5px;background:var(--border);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--lemon);border-radius:3px;transition:width .4s ease}
+.prog-label{font-size:11px;color:var(--text2);text-align:right;margin-top:4px;margin-bottom:14px}
+.q-card{background:var(--card);border:2px solid var(--border);border-radius:var(--rl);padding:1.25rem;margin-bottom:1rem}
+.q-limu-mini{width:46px;height:50px;float:right;margin:-4px -4px 8px 10px}
+.q-greeting{font-size:12px;font-weight:700;color:var(--lemondark);margin-bottom:6px}
+.q-text{font-size:15px;font-weight:600;line-height:1.5;margin-bottom:14px}
+.multi-hint{font-size:11px;color:var(--text2);margin-bottom:10px;font-style:italic}
+.choice-btn{width:100%;text-align:left;padding:12px 14px;background:var(--bg);border:2px solid var(--border);border-radius:var(--rm);font-size:13px;color:var(--text);cursor:pointer;transition:all .15s;margin-bottom:7px;font-family:inherit;display:flex;align-items:center;gap:10px;line-height:1.4}
+.choice-btn::before{content:'';width:18px;height:18px;border-radius:50%;border:2px solid var(--border);flex-shrink:0;transition:all .15s}
+.choice-btn.selected{border-color:var(--lemon);background:#FFF8D6}
+.choice-btn.selected::before{background:var(--lemon);border-color:var(--lemondeep)}
+.open-input{width:100%;padding:12px;border:2px solid var(--border);border-radius:var(--rm);font-size:13px;font-family:inherit;background:var(--bg);color:var(--text);resize:none;min-height:90px;outline:none;line-height:1.6}
+.open-input:focus{border-color:var(--lemon)}
+.open-hint{font-size:11px;color:var(--text2);margin-top:5px;font-style:italic}
+.btn-row{display:flex;gap:8px;margin-top:0}
+.done-stage{background:linear-gradient(180deg,#FFF3C4 0%,#FFFDF5 100%);border:2px solid var(--border);border-radius:var(--rl);padding:1.5rem 1rem;text-align:center;margin-bottom:1rem}
+.done-title{font-size:20px;font-weight:800;color:var(--lemondark);margin-bottom:6px}
+.done-msg{font-size:13px;color:var(--text2);line-height:1.6;margin-bottom:10px}
+.done-count{display:inline-block;background:var(--lemon);border:2px solid var(--lemondeep);border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;color:var(--lemondark)}
+.already-card{background:var(--card);border:2px solid var(--border);border-radius:var(--rl);padding:1.5rem;text-align:center;margin-bottom:1rem}
+.loading{text-align:center;padding:3rem 1rem;color:var(--text2);font-size:14px}
+.error-msg{background:#FCEBEB;border:1px solid #E8B8B8;border-radius:var(--rm);padding:10px 14px;font-size:12px;color:#8B2020;margin-bottom:10px;display:none}
+.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:var(--rm);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap}
+.toast.show{opacity:1}
+</style>
+</head>
+<body>
+
+<div class="top-bar">
+  <div>
+    <div class="top-title">🍋 Floor Check-in</div>
+    <div class="top-sub">Your observations shape next week's strategy</div>
+  </div>
+  <div class="week-pill" id="week-pill">Week 17</div>
+</div>
+
+<!-- NAME + LIMU INTRO -->
+<div class="pg active" id="pg-name">
+  <div class="name-stage">
+    <svg id="lsvg" class="lsvg" width="130" height="140" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+      <ellipse cx="50" cy="106" rx="20" ry="4" fill="#00000012"/>
+      <ellipse cx="50" cy="64" rx="30" ry="35" fill="#E8B820"/>
+      <ellipse cx="50" cy="64" rx="28" ry="33" fill="#F5C842"/>
+      <ellipse cx="50" cy="64" rx="25" ry="30" fill="#F7D060"/>
+      <circle cx="30" cy="60" r="1.5" fill="#E8B820" opacity="0.5"/>
+      <circle cx="69" cy="68" r="1.5" fill="#E8B820" opacity="0.5"/>
+      <circle cx="38" cy="82" r="1.2" fill="#E8B820" opacity="0.4"/>
+      <rect x="48" y="27" width="4" height="9" rx="2" fill="#5a9e32"/>
+      <path d="M 52 32 C 64 20 75 25 68 34 C 64 38 55 36 52 32 Z" fill="#5a9e32"/>
+      <path d="M 52 32 C 59 27 68 30 64 35 C 62 37 55 35 52 32 Z" fill="#7abe4a"/>
+      <path id="brl" d="M 30 50 Q 40 44 48 49" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <path id="brr" d="M 52 49 Q 60 44 70 50" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+      <circle cx="40" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+      <circle cx="60" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+      <circle id="pl" cx="41" cy="60" r="5" fill="#1a1a1a"/>
+      <circle id="pr" cx="61" cy="60" r="5" fill="#1a1a1a"/>
+      <circle cx="43" cy="57" r="2" fill="white"/>
+      <circle cx="63" cy="57" r="2" fill="white"/>
+      <path id="lm" d="M 37 76 Q 50 84 63 76" stroke="#1a1a1a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+      <ellipse id="ckl" cx="29" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.7"/>
+      <ellipse id="ckr" cx="71" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.7"/>
+      <ellipse id="tl" cx="37" cy="68" rx="2.5" ry="3.5" fill="#87CEEB" opacity="0"/>
+      <ellipse id="tr" cx="63" cy="68" rx="2.5" ry="3.5" fill="#87CEEB" opacity="0"/>
+      <text id="sp1" x="6" y="44" font-size="14" opacity="0">✨</text>
+      <text id="sp2" x="74" y="36" font-size="14" opacity="0">✨</text>
+    </svg>
+    <div class="limu-name-txt">Limu</div>
+    <div class="limu-mood" id="lmood">Waiting for your insights 🍋</div>
+    <div class="limu-msg" id="lmsg">3 quick questions. Under 60 seconds.<br>Your answers shape next week's strategy.</div>
+    <div class="dots-wrap" id="ldots"></div>
+    <div class="team-count-txt" id="lcnt">— / 11 submitted this week</div>
+  </div>
+  <div class="error-msg" id="load-error">Could not connect. Check your internet and try again.</div>
+  <div class="name-card">
+    <div class="anon-note">
+      <span style="font-size:15px;flex-shrink:0">🔒</span>
+      <span>Your name is only used to personalize your experience. Your answers are completely anonymous — they never appear with your name in results.</span>
+    </div>
+    <div class="name-label">What's your name?</div>
+    <input class="name-input" type="text" id="name-input" placeholder="e.g. Sarah" autocomplete="off" maxlength="30">
+    <button class="bp" id="name-btn" onclick="submitName()" disabled>Let's go 🍋</button>
+  </div>
+</div>
+
+<!-- ALREADY SUBMITTED -->
+<div class="pg" id="pg-already">
+  <div style="margin-top:1.5rem">
+    <div class="already-card">
+      <svg width="100" height="108" viewBox="0 0 100 110" class="cel" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 12px">
+        <ellipse cx="50" cy="106" rx="20" ry="4" fill="#00000012"/>
+        <ellipse cx="50" cy="64" rx="28" ry="33" fill="#F5C842"/>
+        <ellipse cx="50" cy="64" rx="25" ry="30" fill="#F7D060"/>
+        <rect x="48" y="27" width="4" height="9" rx="2" fill="#5a9e32"/>
+        <path d="M 52 32 C 64 20 75 25 68 34 C 64 38 55 36 52 32 Z" fill="#5a9e32"/>
+        <path d="M 30 50 Q 40 44 48 49" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <path d="M 52 49 Q 60 44 70 50" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <circle cx="40" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="60" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="41" cy="60" r="5" fill="#1a1a1a"/><circle cx="61" cy="60" r="5" fill="#1a1a1a"/>
+        <circle cx="43" cy="57" r="2" fill="white"/><circle cx="63" cy="57" r="2" fill="white"/>
+        <path d="M 37 76 Q 50 84 63 76" stroke="#1a1a1a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="29" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.7"/>
+        <ellipse cx="71" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.7"/>
+        <text x="6" y="44" font-size="14">✨</text><text x="74" y="36" font-size="14">✨</text>
+      </svg>
+      <div style="font-size:18px;font-weight:800;color:var(--lemondark);margin-bottom:8px" id="already-title">Already done!</div>
+      <div style="font-size:13px;color:var(--text2);line-height:1.6">You already submitted this week. Come back next week — Limu will have something to show you.</div>
+    </div>
+  </div>
+</div>
+
+<!-- SURVEY -->
+<div class="pg" id="pg-survey">
+  <div style="padding-top:0.5rem">
+    <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
+    <div class="prog-label" id="prog-lbl">Question 1 of 3</div>
+    <div class="q-card">
+      <svg class="q-limu-mini" viewBox="0 0 100 110" xmlns="http://www.w3.org/2000/svg">
+        <ellipse cx="50" cy="64" rx="28" ry="33" fill="#F5C842"/>
+        <ellipse cx="50" cy="64" rx="25" ry="30" fill="#F7D060"/>
+        <rect x="48" y="27" width="4" height="9" rx="2" fill="#5a9e32"/>
+        <path d="M 52 32 C 64 20 75 25 68 34 C 64 38 55 36 52 32 Z" fill="#5a9e32"/>
+        <path id="qbrl" d="M 30 50 Q 40 44 48 49" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <path id="qbrr" d="M 52 49 Q 60 44 70 50" stroke="#1a1a1a" stroke-width="4" fill="none" stroke-linecap="round"/>
+        <circle cx="40" cy="59" r="8" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="60" cy="59" r="8" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="41" cy="60" r="4.5" fill="#1a1a1a"/><circle cx="61" cy="60" r="4.5" fill="#1a1a1a"/>
+        <circle cx="43" cy="57" r="1.8" fill="white"/><circle cx="63" cy="57" r="1.8" fill="white"/>
+        <path id="qlm" d="M 37 76 Q 50 83 63 76" stroke="#1a1a1a" stroke-width="3" fill="none" stroke-linecap="round"/>
+        <ellipse cx="29" cy="70" rx="6" ry="4" fill="#F0957A" opacity="0.6"/>
+        <ellipse cx="71" cy="70" rx="6" ry="4" fill="#F0957A" opacity="0.6"/>
+      </svg>
+      <div class="q-greeting" id="q-greet">Limu wants to know 🍋</div>
+      <div class="q-text" id="q-text"></div>
+      <div id="q-opts"></div>
+    </div>
+    <div class="btn-row">
+      <button class="bs" id="back-btn" onclick="prevQ()" style="display:none;margin-top:0;width:auto;padding:14px 18px;flex-shrink:0">← Back</button>
+      <button class="bp" id="next-btn" onclick="nextQ()" style="margin-top:0">Next →</button>
+    </div>
+  </div>
+</div>
+
+<!-- DONE -->
+<div class="pg" id="pg-done">
+  <div style="margin-top:0.5rem">
+    <div class="done-stage">
+      <svg width="130" height="140" viewBox="0 0 100 110" class="cel" xmlns="http://www.w3.org/2000/svg" style="display:block;margin:0 auto 8px">
+        <ellipse cx="50" cy="106" rx="20" ry="4" fill="#00000012"/>
+        <ellipse cx="50" cy="64" rx="30" ry="35" fill="#E8B820"/>
+        <ellipse cx="50" cy="64" rx="28" ry="33" fill="#F5C842"/>
+        <ellipse cx="50" cy="64" rx="25" ry="30" fill="#F7D060"/>
+        <circle cx="30" cy="60" r="1.5" fill="#E8B820" opacity="0.5"/>
+        <circle cx="69" cy="68" r="1.5" fill="#E8B820" opacity="0.5"/>
+        <rect x="48" y="27" width="4" height="9" rx="2" fill="#5a9e32"/>
+        <path d="M 52 32 C 64 20 75 25 68 34 C 64 38 55 36 52 32 Z" fill="#5a9e32"/>
+        <path d="M 52 32 C 59 27 68 30 64 35 C 62 37 55 35 52 32 Z" fill="#7abe4a"/>
+        <path d="M 30 50 Q 40 44 48 49" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <path d="M 52 49 Q 60 44 70 50" stroke="#1a1a1a" stroke-width="4.5" fill="none" stroke-linecap="round"/>
+        <circle cx="40" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="60" cy="59" r="9" fill="white" stroke="#1a1a1a" stroke-width="1.8"/>
+        <circle cx="41" cy="60" r="5" fill="#1a1a1a"/><circle cx="61" cy="60" r="5" fill="#1a1a1a"/>
+        <circle cx="43" cy="57" r="2" fill="white"/><circle cx="63" cy="57" r="2" fill="white"/>
+        <path d="M 37 76 Q 50 84 63 76" stroke="#1a1a1a" stroke-width="3.5" fill="none" stroke-linecap="round"/>
+        <ellipse cx="29" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.9"/>
+        <ellipse cx="71" cy="70" rx="7" ry="5" fill="#F0957A" opacity="0.9"/>
+        <text x="6" y="44" font-size="14">✨</text>
+        <text x="74" y="36" font-size="14">✨</text>
+      </svg>
+      <div class="done-title" id="done-title">Limu loves you!</div>
+      <div class="done-msg" id="done-msg">Your insight just made the team stronger.</div>
+      <div class="done-count" id="done-cnt">— / 11 submitted</div>
+      <div style="margin-top:14px;font-size:13px;color:var(--text2);line-height:1.6" id="done-thanks"></div>
+    </div>
+    <button class="bp" onclick="closePage()" style="margin-top:4px">Close 🍋</button>
+    <button class="bs" onclick="startOver()">Submit another response</button>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+const SUPABASE_URL = 'https://yesbytjwqwtiygjeaaxp.supabase.co';
+const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inllc2J5dGp3cXd0aXlnamVhYXhwIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODAzMjc4NDQsImV4cCI6MjA5NTkwMzg0NH0.jNgdBbGFChtJMUIWVBIND_oyCqtEpQjQHH7rDReoOgY';
+
+async function sbFetch(path, options={}) {
+  const res = await fetch(SUPABASE_URL + '/rest/v1' + path, {
+    ...options,
+    headers: {
+      'apikey': SUPABASE_KEY,
+      'Authorization': 'Bearer ' + SUPABASE_KEY,
+      'Content-Type': 'application/json',
+      'Prefer': 'return=minimal',
+      ...options.headers
+    }
+  });
+  return res;
+}
+
+async function getWeekResponses() {
+  const res = await sbFetch(`/responses?week=eq.${encodeURIComponent(CONFIG.week)}&select=name`);
+  if (!res.ok) return [];
+  return await res.json();
+}
+
+async function checkSubmitted(name) {
+  const res = await sbFetch(`/responses?week=eq.${encodeURIComponent(CONFIG.week)}&name=ilike.${encodeURIComponent(name)}&select=id`);
+  if (!res.ok) return false;
+  const data = await res.json();
+  return data.length > 0;
+}
+
+async function submitResponse(name, q1, q2, q3) {
+  const res = await sbFetch('/responses', {
+    method: 'POST',
+    headers: { 'Prefer': 'return=minimal' },
+    body: JSON.stringify({
+      name,
+      week: CONFIG.week,
+      q1: Array.isArray(q1) ? q1.join(', ') : q1,
+      q2,
+      q3
+    })
+  });
+  return res.ok || res.status === 201;
+}
+
+const TEAM_SIZE = 11;
+
+const CONFIG = {
+  week: 'Week 17',
+  q1Options: [
+    "Couldn't find their size",
+    "Price point too high",
+    "Didn't find a style they liked",
+    "Just browsing, no intent",
+    "Came for something specific we didn't have",
+    "Tried on but nothing fit right",
+    "Ordered online instead"
+  ],
+  q3Options: [
+    "Daydrift Pant",
+    "Swift Wide Leg",
+    "Align Waist Length Tank",
+    "Cotton Modal Dolman",
+    "Love Crew",
+    "Groove Low Rise"
+  ]
+};
+
+const DONE_TITLES = ['Limu loves you!','You\'re a legend!','That\'s what we needed!','You just made the floor smarter.'];
+const DONE_MSGS = ['Your insight just made the team stronger.','Limu felt that one. Thank you!','The floor data is richer because of you.','Strategy gets better when everyone contributes.','Real talk from the floor — that\'s gold.'];
+
+let userName = '';
+let step = 0;
+let answers = {};
+
+// SUPABASE HELPERS
+async function sbFetch(path, options={}) {
+  const url = 'https://yesbytjwqwtiygjeaaxp.supabase.co/rest/v1' + path;
+  const headers = {
+    'apikey': SUPABASE_KEY,
+    'Authorization': 'Bearer ' + SUPABASE_KEY,
+    'Content-Type': 'application/json',
+    ...(options.headers||{})
+  };
+  return await fetch(url, {...options, headers});
+}
+
+async function getWeekResponses() {
+  try {
+    const res = await sbFetch(`/responses?week=eq.${encodeURIComponent(CONFIG.week)}&select=name`);
+    if (!res.ok) return [];
+    return await res.json();
+  } catch(e) { return []; }
+}
+
+async function checkSubmitted(name) {
+  try {
+    const res = await sbFetch(`/responses?week=eq.${encodeURIComponent(CONFIG.week)}&name=ilike.${encodeURIComponent(name)}&select=id`);
+    if (!res.ok) return false;
+    const data = await res.json();
+    return data.length > 0;
+  } catch(e) { return false; }
+}
+
+async function submitResponse(name, q1, q2, q3) {
+  try {
+    const res = await sbFetch('/responses', {
+      method: 'POST',
+      headers: {'Prefer': 'return=minimal'},
+      body: JSON.stringify({name, week: CONFIG.week, q1: Array.isArray(q1)?q1.join(', '):q1, q2, q3})
+    });
+    return res.ok || res.status === 201;
+  } catch(e) { return false; }
+}
+
+function setLimuMood(mood){
+  const m=document.getElementById('lm');
+  const brl=document.getElementById('brl');
+  const brr=document.getElementById('brr');
+  const ckl=document.getElementById('ckl');
+  const ckr=document.getElementById('ckr');
+  const tl=document.getElementById('tl');
+  const tr=document.getElementById('tr');
+  const sp1=document.getElementById('sp1');
+  const sp2=document.getElementById('sp2');
+  const svg=document.getElementById('lsvg');
+  const pl=document.getElementById('pl');
+  const pr=document.getElementById('pr');
+  if(mood==='neutral'){
+    // small flat mouth, no cheeks
+    m&&m.setAttribute('d','M 40 77 Q 50 78 60 77');
+    brl&&brl.setAttribute('d','M 30 50 Q 40 46 48 49');
+    brr&&brr.setAttribute('d','M 52 49 Q 60 46 70 50');
+    tl&&tl.setAttribute('opacity','0');tr&&tr.setAttribute('opacity','0');
+    ckl&&ckl.setAttribute('opacity','0');ckr&&ckr.setAttribute('opacity','0');
+    sp1&&sp1.setAttribute('opacity','0');sp2&&sp2.setAttribute('opacity','0');
+    pl&&pl.setAttribute('r','5');pr&&pr.setAttribute('r','5');
+    svg&&svg.classList.remove('cel');
+  } else if(mood==='happy'){
+    // clear smile, cheeks appear
+    m&&m.setAttribute('d','M 36 75 Q 50 88 64 75');
+    brl&&brl.setAttribute('d','M 30 49 Q 40 43 48 48');
+    brr&&brr.setAttribute('d','M 52 48 Q 60 43 70 49');
+    tl&&tl.setAttribute('opacity','0');tr&&tr.setAttribute('opacity','0');
+    ckl&&ckl.setAttribute('opacity','0.8');ckr&&ckr.setAttribute('opacity','0.8');
+    sp1&&sp1.setAttribute('opacity','0.9');sp2&&sp2.setAttribute('opacity','0.9');
+    pl&&pl.setAttribute('r','5');pr&&pr.setAttribute('r','5');
+    svg&&svg.classList.remove('cel');
+  } else if(mood==='celebrate'){
+    // big wide smile, full cheeks, bigger eyes, bouncing
+    m&&m.setAttribute('d','M 33 74 Q 50 92 67 74');
+    brl&&brl.setAttribute('d','M 28 46 Q 40 40 48 46');
+    brr&&brr.setAttribute('d','M 52 46 Q 60 40 72 46');
+    tl&&tl.setAttribute('opacity','0');tr&&tr.setAttribute('opacity','0');
+    ckl&&ckl.setAttribute('opacity','1');ckr&&ckr.setAttribute('opacity','1');
+    sp1&&sp1.setAttribute('opacity','1');sp2&&sp2.setAttribute('opacity','1');
+    pl&&pl.setAttribute('r','5.5');pr&&pr.setAttribute('r','5.5');
+    svg&&svg.classList.add('cel');
+  }
+}
+
+function updLimu(n) {
+  const pct = n / TEAM_SIZE;
+  const dots = document.getElementById('ldots');
+  if (!dots) return;
+  dots.innerHTML = '';
+  for (let i = 0; i < TEAM_SIZE; i++) {
+    const d = document.createElement('div');
+    d.className = 'dot' + (i < n ? ' on' : '');
+    d.textContent = i < n ? '✓' : '';
+    dots.appendChild(d);
+  }
+  document.getElementById('lcnt').textContent = n + ' / ' + TEAM_SIZE + ' submitted this week';
+  if (n === 0) {
+    setLimuMood('neutral');
+    document.getElementById('lmood').textContent = 'Waiting for your insights';
+    document.getElementById('lmsg').innerHTML = '3 quick questions. Under 60 seconds.<br>Your answers shape next week\'s strategy.';
+  } else if (pct < 0.5) {
+    setLimuMood('neutral');
+    document.getElementById('lmood').textContent = 'Getting warmer 🙂';
+    document.getElementById('lmsg').innerHTML = 'Some insights in. Keep them coming!';
+  } else if (pct < 1) {
+    setLimuMood('happy');
+    document.getElementById('lmood').textContent = 'Almost there! 😊';
+    document.getElementById('lmsg').innerHTML = 'More than halfway. Limu is happy!';
+  } else {
+    setLimuMood('celebrate');
+    document.getElementById('lmood').textContent = 'Full team! 🎉';
+    document.getElementById('lmsg').innerHTML = 'Everyone submitted. This is what great teams do.';
+  }
+}
+
+async function loadIntro() {
+  try {
+    const rows = await getWeekResponses();
+    updLimu(rows.length);
+  } catch(e) {
+    // silently fail - don't block the form
+    updLimu(0);
+  }
+}
+
+// NAME
+document.getElementById('name-input').addEventListener('input', function() {
+  document.getElementById('name-btn').disabled = this.value.trim().length < 2;
+});
+document.getElementById('name-input').addEventListener('keypress', function(e) {
+  if (e.key === 'Enter' && this.value.trim().length >= 2) submitName();
+});
+
+async function submitName() {
+  userName = document.getElementById('name-input').value.trim();
+  if (!userName) return;
+  step = 0; answers = {};
+  showPg('pg-survey');
+  renderQ();
+}
+
+// SURVEY
+const QS = [
+  { type: 'checkbox', greet: n => 'Hey ' + n + ', Limu wants to know 🍋', q: 'What is the main reason guests left without buying anything this week?', opts: CONFIG.q1Options },
+  { type: 'open', greet: n => 'You\'re doing great ' + n + ' 🍋', q: 'What is one thing guests were looking for this week that we didn\'t have?', ph: 'Be specific — a style, a colour, a fit...' },
+  { type: 'single', greet: n => 'Last one ' + n + '! 🍋', q: 'Which product on the floor do you think guests are most underrating right now?', opts: CONFIG.q3Options }
+];
+
+function renderQ() {
+  const q = QS[step];
+  document.getElementById('prog').style.width = Math.round((step / QS.length) * 100) + '%';
+  document.getElementById('prog-lbl').textContent = 'Question ' + (step + 1) + ' of ' + QS.length;
+  document.getElementById('q-greet').textContent = q.greet(userName);
+  document.getElementById('q-text').textContent = q.q;
+  if(step===0){
+    setLimuMood('neutral');
+    document.getElementById('qlm')?.setAttribute('d','M 37 78 Q 50 80 63 78');
+    document.getElementById('qbrl')?.setAttribute('d','M 30 50 Q 40 46 48 50');
+    document.getElementById('qbrr')?.setAttribute('d','M 52 50 Q 60 46 70 50');
+  } else if(step===1){
+    setLimuMood('happy');
+    document.getElementById('qlm')?.setAttribute('d','M 37 77 Q 50 83 63 77');
+    document.getElementById('qbrl')?.setAttribute('d','M 30 49 Q 40 44 48 49');
+    document.getElementById('qbrr')?.setAttribute('d','M 52 49 Q 60 44 70 49');
+  } else if(step===2){
+    setLimuMood('celebrate');
+    document.getElementById('qlm')?.setAttribute('d','M 37 76 Q 50 84 63 76');
+    document.getElementById('qbrl')?.setAttribute('d','M 30 48 Q 40 43 48 48');
+    document.getElementById('qbrr')?.setAttribute('d','M 52 48 Q 60 43 70 48');
+  }
+
+  let html = '';
+  if (q.type === 'checkbox' || q.type === 'single') {
+    if (q.type === 'checkbox') html += '<div class="multi-hint">You can select multiple options</div>';
+    q.opts.forEach(o => html += `<button class="choice-btn" onclick="selOpt(this,'${q.type}')">${o}</button>`);
+  } else {
+    html = `<textarea class="open-input" id="open-ans" placeholder="${q.ph}"></textarea><div class="open-hint">The more specific the better 🍋</div>`;
+  }
+  document.getElementById('q-opts').innerHTML = html;
+  document.getElementById('next-btn').textContent = step >= QS.length - 1 ? 'Submit 🍋' : 'Next →';
+  document.getElementById('back-btn').style.display = step > 0 ? 'block' : 'none';
+  // restore saved answer
+  const saved = answers['q' + (step + 1)];
+  if (saved) {
+    if (q.type === 'checkbox' || q.type === 'single') {
+      const arr = Array.isArray(saved) ? saved : [saved];
+      document.querySelectorAll('.choice-btn').forEach(btn => { if (arr.includes(btn.textContent)) btn.classList.add('selected'); });
+    } else {
+      const ta = document.getElementById('open-ans');
+      if (ta) ta.value = saved;
+    }
+  }
+}
+
+function prevQ() { if (step > 0) { step--; renderQ(); } }
+
+function selOpt(el, type) {
+  if (type === 'single') document.querySelectorAll('.choice-btn').forEach(b => b.classList.remove('selected'));
+  el.classList.toggle('selected');
+}
+
+async function nextQ() {
+  const q = QS[step];
+  let ans;
+  if (q.type === 'checkbox') {
+    ans = Array.from(document.querySelectorAll('.choice-btn.selected')).map(b => b.textContent);
+    if (!ans.length) { showToast('Please select an option 🍋'); return; }
+  } else if (q.type === 'open') {
+    ans = document.getElementById('open-ans')?.value?.trim() || '';
+    if (!ans) { showToast('Please share something 🍋'); return; }
+  } else {
+    ans = Array.from(document.querySelectorAll('.choice-btn.selected')).map(b => b.textContent)[0] || '';
+    if (!ans) { showToast('Please pick one 🍋'); return; }
+  }
+  answers['q' + (step + 1)] = ans;
+  if (step < QS.length - 1) { step++; renderQ(); }
+  else await doSubmit();
+}
+
+async function doSubmit() {
+  document.getElementById('next-btn').disabled = true;
+  document.getElementById('next-btn').textContent = 'Saving...';
+  try {
+    await submitResponse(userName, answers.q1, answers.q2, answers.q3);
+  } catch(e) {
+    // continue to done screen regardless
+  }
+  try {
+    const rows = await getWeekResponses();
+    document.getElementById('done-cnt').textContent = rows.length + ' / ' + TEAM_SIZE + ' submitted this week';
+  } catch(e) {
+    document.getElementById('done-cnt').textContent = '— / ' + TEAM_SIZE + ' submitted this week';
+  }
+  document.getElementById('done-title').textContent = DONE_TITLES[Math.floor(Math.random() * DONE_TITLES.length)];
+  document.getElementById('done-msg').textContent = DONE_MSGS[Math.floor(Math.random() * DONE_MSGS.length)];
+  document.getElementById('done-thanks').textContent = 'Thank you ' + userName + '. See you next week 🍋';
+  showPg('pg-done');
+}
+
+function closePage(){
+  window.close();
+  // fallback if window.close() is blocked
+  document.body.innerHTML = '<div style="display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;font-family:-apple-system,sans-serif;background:#FFFDF5;text-align:center;padding:2rem"><div style="font-size:48px;margin-bottom:16px">🍋</div><div style="font-size:18px;font-weight:700;color:#C8960A;margin-bottom:8px">All done!</div><div style="font-size:13px;color:#6b6b6b">You can close this tab now.</div></div>';
+}
+
+function startOver(){
+  userName='';step=0;answers={};
+  document.getElementById('name-input').value='';
+  document.getElementById('name-btn').disabled=true;
+  setLimuMood('neutral');
+  showPg('pg-name');
+  loadIntro();
+}
+
+function showPg(id) {
+  document.querySelectorAll('.pg').forEach(p => p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function showToast(m) {
+  const t = document.getElementById('toast');
+  t.textContent = m; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+document.getElementById('week-pill').textContent = CONFIG.week;
+setLimuMood('neutral');
+loadIntro();
+</script>
+</body>
+</html>
