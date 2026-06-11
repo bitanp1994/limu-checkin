@@ -69,7 +69,14 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .back-btn{width:auto;padding:13px 18px;flex-shrink:0;margin-top:0}
 .next-btn{flex:1;margin-top:0}
 
-.toast{position:fixed;bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:var(--rm);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap}
+.r-bar-wrap{margin-bottom:8px}
+.r-bar-labels{display:flex;justify-content:space-between;font-size:12px;margin-bottom:3px}
+.r-bar-name{font-weight:500;color:var(--text)}
+.r-bar-cnt{color:var(--text2)}
+.r-bar{height:7px;background:var(--border);border-radius:4px;overflow:hidden}
+.r-bar-fill{height:100%;background:var(--lemon);border-radius:4px}
+.r-bar-fill.top{background:var(--lemondeep)}
+.q2-response{font-size:12px;color:var(--text);padding:7px 10px;background:var(--grey);border-radius:8px;margin-bottom:6px;line-height:1.5}bottom:24px;left:50%;transform:translateX(-50%);background:#1a1a1a;color:#fff;padding:10px 20px;border-radius:var(--rm);font-size:13px;opacity:0;transition:opacity .3s;pointer-events:none;z-index:100;white-space:nowrap}
 .toast.show{opacity:1}
 </style>
 </head>
@@ -117,11 +124,45 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
     <div class="team-cnt" id="lcnt">— / 11 submitted this week</div>
   </div>
   <div class="start-card">
-    <button class="bp" onclick="startSurvey()">Let's go 🍋</button>
+    <button class="bp" id="lets-go-btn" onclick="checkLastWeek()">Let's go 🍋</button>
   </div>
 </div>
 
-<!-- SURVEY -->
+<!-- LAST WEEK REVEAL -->
+<div class="pg" id="pg-reveal">
+  <div style="margin-top:.5rem">
+    <!-- LOCKED -->
+    <div id="reveal-locked" style="display:none">
+      <div class="done-stage" style="background:linear-gradient(180deg,#F0F0F0 0%,#FAFAFA 100%)">
+        <div style="font-size:56px;margin-bottom:8px">🔒</div>
+        <div style="font-size:18px;font-weight:800;color:#1a1a1a;margin-bottom:8px">Limu's lips are sealed</div>
+        <div style="font-size:13px;color:var(--text2);line-height:1.7;margin-bottom:12px">Not enough teammates checked in last week.<br>Get 8 out of 10 in this week and<br>Limu will spill everything. 👀</div>
+        <div id="locked-count" style="display:inline-block;background:#e8e8e4;border-radius:20px;padding:6px 16px;font-size:13px;font-weight:700;color:#6b6b6b"></div>
+      </div>
+      <button class="bp" onclick="startSurvey()">Ok, let's go 🍋</button>
+    </div>
+    <!-- UNLOCKED -->
+    <div id="reveal-unlocked" style="display:none">
+      <div class="done-stage" style="background:linear-gradient(180deg,#FFF9E6 0%,#FFFDF5 100%)">
+        <div style="font-size:20px;font-weight:800;color:var(--lemondark);margin-bottom:4px">Last week the team said... 🍋</div>
+        <div style="font-size:13px;color:var(--text2);margin-bottom:16px" id="reveal-week-label">Week — results</div>
+        <div id="reveal-q1-section" style="text-align:left;margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Why guests left without buying</div>
+          <div id="reveal-q1-bars"></div>
+        </div>
+        <div id="reveal-q2-section" style="text-align:left;margin-bottom:16px">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">What guests couldn't find</div>
+          <div id="reveal-q2-responses"></div>
+        </div>
+        <div id="reveal-q3-section" style="text-align:left">
+          <div style="font-size:11px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;margin-bottom:8px">Most underrated product</div>
+          <div id="reveal-q3-bars"></div>
+        </div>
+      </div>
+      <button class="bp" onclick="startSurvey()">Now this week's questions 🍋</button>
+    </div>
+  </div>
+</div>
 <div class="pg" id="pg-survey">
   <div>
     <div class="prog-bar"><div class="prog-fill" id="prog" style="width:0%"></div></div>
@@ -189,7 +230,8 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
       </svg>
       <div class="done-title" id="done-title">Limu loves you!</div>
       <div class="done-msg" id="done-msg">Your insight just made the team stronger.</div>
-      <div class="done-cnt" id="done-cnt">— / 11 submitted</div>
+      <div class="done-cnt" id="done-cnt">— / 10 submitted</div>
+      <div style="font-size:12px;color:var(--text2);margin-top:10px;line-height:1.6">Come back next week — if the full team checks in, Limu will reveal everything. 🍋</div>
       <div class="done-thanks">Thank you. See you next week 🍋</div>
     </div>
     <button class="bp" onclick="closePage()">Close</button>
@@ -205,7 +247,7 @@ const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZ
 const TEAM_SIZE = 10;
 
 const CONFIG = {
-  week: 'Week 17',
+  week: 'Week 18',
   q1Options: [
     "Couldn't find their size",
     "Price point too high",
@@ -236,7 +278,7 @@ const QUESTIONS = [
     type: 'open',
     label: "You're doing great 🍋",
     q: "What is one thing guests were looking for this week that we didn't have?",
-    ph: 'Be specific — a style, a colour, a fit...'
+    ph: 'Be specific - a style, a colour, a fit...'
   },
   {
     type: 'single',
@@ -388,6 +430,96 @@ async function loadIntro() {
     document.getElementById('lmsg').innerHTML = 'Everyone submitted. This is what great teams do.';
     setMood('celebrate');
   }
+}
+
+function getPrevWeek() {
+  // get the previous week key from Supabase by checking what weeks exist
+  // For now derive from CONFIG - previous week number
+  const match = CONFIG.week.match(/(\d+)/);
+  if (!match) return null;
+  const num = parseInt(match[1]);
+  return CONFIG.week.replace(/\d+/, num - 1);
+}
+
+async function checkLastWeek() {
+  document.getElementById('lets-go-btn').disabled = true;
+  document.getElementById('lets-go-btn').textContent = 'Loading... 🍋';
+  try {
+    const prevWeek = getPrevWeek();
+    if (!prevWeek) { startSurvey(); return; }
+    const res = await sbFetch(`/responses?week=eq.${encodeURIComponent(prevWeek)}&select=q1,q2,q3`);
+    if (!res || !res.ok) {
+      // connection failed - show locked as fallback
+      document.getElementById('locked-count').textContent = 'Could not load last week';
+      document.getElementById('reveal-locked').style.display = 'block';
+      document.getElementById('reveal-unlocked').style.display = 'none';
+      showPg('pg-reveal');
+      return;
+    }
+    const data = await res.json();
+    showPg('pg-reveal');
+    if (!data.length) {
+      document.getElementById('locked-count').textContent = '0/10 teammates checked in last week';
+      document.getElementById('reveal-locked').style.display = 'block';
+      document.getElementById('reveal-unlocked').style.display = 'none';
+    } else if (data.length >= 8) {
+      renderRevealData(data, prevWeek);
+      document.getElementById('reveal-locked').style.display = 'none';
+      document.getElementById('reveal-unlocked').style.display = 'block';
+    } else {
+      document.getElementById('locked-count').textContent = data.length + '/10 teammates checked in last week';
+      document.getElementById('reveal-locked').style.display = 'block';
+      document.getElementById('reveal-unlocked').style.display = 'none';
+    }
+  } catch(e) {
+    console.log('checkLastWeek error:', e);
+    startSurvey();
+  }
+}
+
+function renderRevealData(data, weekLabel) {
+  document.getElementById('reveal-week-label').textContent = weekLabel + ' - ' + data.length + ' responses';
+
+  // Q1 bar chart
+  const q1Tally = {};
+  data.forEach(r => {
+    if (r.q1) {
+      const answers = r.q1.split(', ');
+      answers.forEach(a => { q1Tally[a] = (q1Tally[a] || 0) + 1; });
+    }
+  });
+  const q1Sorted = Object.entries(q1Tally).sort((a,b) => b[1]-a[1]).slice(0,5);
+  const q1Max = q1Sorted[0]?.[1] || 1;
+  let q1html = '';
+  q1Sorted.forEach(([name, cnt], i) => {
+    const pct = Math.round((cnt/q1Max)*100);
+    q1html += `<div class="r-bar-wrap">
+      <div class="r-bar-labels"><span class="r-bar-name">${name}</span><span class="r-bar-cnt">${cnt}</span></div>
+      <div class="r-bar"><div class="r-bar-fill${i===0?' top':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('reveal-q1-bars').innerHTML = q1html || '<div style="font-size:12px;color:var(--text2)">No responses</div>';
+
+  // Q2 open text
+  const q2s = data.filter(r => r.q2).map(r => r.q2);
+  let q2html = '';
+  q2s.forEach(r => { q2html += `<div class="q2-response">"${r}"</div>`; });
+  document.getElementById('reveal-q2-responses').innerHTML = q2html || '<div style="font-size:12px;color:var(--text2)">No responses</div>';
+
+  // Q3 bar chart
+  const q3Tally = {};
+  data.forEach(r => { if (r.q3) q3Tally[r.q3] = (q3Tally[r.q3] || 0) + 1; });
+  const q3Sorted = Object.entries(q3Tally).sort((a,b) => b[1]-a[1]);
+  const q3Max = q3Sorted[0]?.[1] || 1;
+  let q3html = '';
+  q3Sorted.forEach(([name, cnt], i) => {
+    const pct = Math.round((cnt/q3Max)*100);
+    q3html += `<div class="r-bar-wrap">
+      <div class="r-bar-labels"><span class="r-bar-name">${i===0?'🏆 ':''}${name}</span><span class="r-bar-cnt">${cnt} vote${cnt>1?'s':''}</span></div>
+      <div class="r-bar"><div class="r-bar-fill${i===0?' top':''}" style="width:${pct}%"></div></div>
+    </div>`;
+  });
+  document.getElementById('reveal-q3-bars').innerHTML = q3html || '<div style="font-size:12px;color:var(--text2)">No responses</div>';
 }
 
 function startSurvey() {
