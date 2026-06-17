@@ -265,13 +265,6 @@ const CONFIG = {
     "Bend This Cami Spaghetti-Strap Bra",
     "Nulu Ribbed Scoopneck Bra",
     "Others - Specify"
-  ],
-  q4Options: [
-    "Option 1",
-    "Option 2",
-    "Option 3",
-    "Option 4",
-    "Others - Specify"
   ]
 };
 
@@ -295,10 +288,10 @@ const QUESTIONS = [
     opts: CONFIG.q3Options
   },
   {
-    type: 'single',
+    type: 'open',
     label: 'For the backroom crew 🍋',
-    q: "What's the most common thing that creates extra work for you in the backroom?",
-    opts: CONFIG.q4Options,
+    q: "Is there a product you're noticing pile up in the back that might be slowing on the floor?",
+    ph: 'Style, category, anything you have noticed...',
     optional: true
   }
 ];
@@ -573,9 +566,6 @@ function renderQ() {
       html += `<button class="choice-btn" onclick="this.classList.toggle('sel')">${o}</button>`;
     });
   } else if (q.type === 'single') {
-    if (q.optional) {
-      html += '<div class="multi-hint">Optional - skip if this isn\'t part of your role</div>';
-    }
     q.opts.forEach(o => {
       html += `<button class="choice-btn" onclick="selectOne(this,'${o}')">${o}</button>`;
     });
@@ -583,7 +573,7 @@ function renderQ() {
       <input type="text" id="specify-input" class="open-input" style="min-height:0;padding:10px 12px" placeholder="Please specify...">
     </div>`;
   } else {
-    html = `<textarea class="open-input" id="open-ans" placeholder="${q.ph}"></textarea><div class="open-hint">The more specific the better 🍋</div>`;
+    html = `<textarea class="open-input" id="open-ans" placeholder="${q.ph}"></textarea><div class="open-hint">${q.optional ? 'Optional - only relevant if you work in the backroom' : 'The more specific the better 🍋'}</div>`;
   }
   document.getElementById('q-opts').innerHTML = html;
 
@@ -635,7 +625,7 @@ async function nextQ() {
     if (!ans.length) { showToast('Please select an option 🍋'); return; }
   } else if (q.type === 'open') {
     ans = (document.getElementById('open-ans')?.value || '').trim();
-    if (!ans) { showToast('Please share something 🍋'); return; }
+    if (!ans && !q.optional) { showToast('Please share something 🍋'); return; }
   } else {
     const sel = document.querySelector('.choice-btn.sel');
     if (!sel) {
