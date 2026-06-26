@@ -260,8 +260,7 @@ const CONFIG = {
   ],
   q3Options: [
     "Daydrift Pant",
-    "Jersey Training Tank",
-    "Nulu Cinch-Hem Drapery Pant",
+    "lululinen Shorts",
     "Bend This Cami Spaghetti-Strap Bra",
     "Nulu Ribbed Scoopneck Bra",
     "Others - Specify"
@@ -470,7 +469,7 @@ async function checkLastWeek() {
       document.getElementById('locked-count').textContent = '0/10 teammates checked in last week';
       document.getElementById('reveal-locked').style.display = 'block';
       document.getElementById('reveal-unlocked').style.display = 'none';
-    } else if (data.length >= 7) {
+    } else if (data.length >= 6) {
       renderRevealData(data, prevWeek);
       document.getElementById('reveal-locked').style.display = 'none';
       document.getElementById('reveal-unlocked').style.display = 'block';
